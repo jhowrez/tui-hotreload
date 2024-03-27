@@ -1,0 +1,12 @@
+options:
+  - name: Build Command
+    yaml: command.build
+    default: ""
+  - name: Exec Command
+    yaml: command.exec
+    default: ""
+  # Watch Folders
+  - name: Watch Folders
+    yaml: watch.folders
+    default:
+      - ""
