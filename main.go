@@ -10,9 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/beowulf20/tui-hotreload/pkg/options"
 	"github.com/creack/pty"
 	"github.com/fsnotify/fsnotify"
+	"github.com/jhowrez/tui-hotreload/pkg/options"
 	"github.com/muesli/cancelreader"
 	"golang.org/x/term"
 )
