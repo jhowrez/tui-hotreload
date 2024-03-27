@@ -1,4 +1,4 @@
-module github.com/beowulf20/tui-hotreload
+module github.com/jhowrez/tui-hotreload
 
 go 1.22.0
 
