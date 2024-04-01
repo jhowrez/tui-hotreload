@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -122,12 +123,20 @@ func main() {
 		}
 	}()
 
-	for _, folder := range options.GetOptions().Watch.Folders {
-		// Add  path.
-		err = watcher.Add(folder)
+	for _, pathPattern := range options.GetOptions().Watch.Folders {
+		// Add path.
+		paths, err := filepath.Glob(pathPattern)
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		for _, path := range paths {
+			err = watcher.Add(path)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
 	}
 
 	// Block main goroutine forever.
