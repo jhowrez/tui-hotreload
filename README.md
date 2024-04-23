@@ -1,5 +1,11 @@
+### Motivation
+I've been using [air](https://github.com/cosmtrek/air) for every project thus far, but recently I wanted to built feature rich internal application through TUI and since I did not manage to make air work with bubble, this helper tool was born. 
 
-### Sample TUI Option File
+All it does is simply watch for file changes and serve your application through [creack/pty](https://github.com/creack/pty) as defined in your local **app.yaml** file (check configuration below).
+
+### Sample configuration files app.yaml
+
+#### Sample TUI Option File
 ``` yaml
 command:
   build: go build -gcflags="all=-N -l" -o ./tmp/tui.run ./cmd/test1
@@ -10,7 +16,7 @@ watch:
     - "./cmd/test1"
 ```
 
-### Sample Debug Option File
+#### Sample Debug Option File
 
 ``` yaml
 command:
