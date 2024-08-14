@@ -10,3 +10,7 @@ options:
     yaml: watch.folders
     default:
       - ""
+  - name: Root Watch Folder
+    yaml: watch.root
+    description: if empty, will default to execution path
+    default: ""

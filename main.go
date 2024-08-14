@@ -7,15 +7,15 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/creack/pty"
 	"github.com/fsnotify/fsnotify"
-	"github.com/jhowrez/tui-hotreload/pkg/options"
 	"github.com/muesli/cancelreader"
 	"golang.org/x/term"
+
+	"github.com/jhowrez/tui-hotreload/pkg/options"
 )
 
 var (
@@ -32,12 +32,13 @@ func init() {
 
 func RunCommand() *exec.Cmd {
 	appOptions := options.GetOptions()
+
 	err := exec.Command("/bin/bash", "-c", appOptions.Command.Build).Run()
 	if err != nil {
 		log.Printf("failed to build: %s", err)
 		return nil
 	}
-	cmd := exec.Command("/bin/bash", "-c", appOptions.Command.Exec)
+	cmd = exec.Command("/bin/bash", "-c", appOptions.Command.Exec)
 
 	// Set stdin in raw mode.
 	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
@@ -86,6 +87,10 @@ func RunCommand() *exec.Cmd {
 }
 
 func main() {
+	if options.GetOptions().Watch.Root != "" {
+		os.Chdir(options.GetOptions().Watch.Root)
+	}
+
 	// Create new watcher.
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -125,7 +130,7 @@ func main() {
 
 	for _, pathPattern := range options.GetOptions().Watch.Folders {
 		// Add path.
-		paths, err := filepath.Glob(pathPattern)
+		paths, err := BetterGlob(pathPattern)
 		if err != nil {
 			log.Fatal(err)
 		}

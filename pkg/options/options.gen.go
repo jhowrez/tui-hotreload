@@ -21,6 +21,8 @@ type ApplicationOptions struct {
 	Watch struct {
 		//
 		Folders []string `yaml:"watch.folders"`
+		// if empty, will default to execution path
+		Root string `yaml:"watch.root"`
 	}
 }
 
@@ -42,6 +44,12 @@ func OptionsInit(configFilenamePtr *string) {
 	applicationOptions.Watch.Folders = []string{""}
 	viper.SetDefault("watch.folders",
 		applicationOptions.Watch.Folders,
+	)
+
+	// watch.root
+	applicationOptions.Watch.Root = ""
+	viper.SetDefault("watch.root",
+		applicationOptions.Watch.Root,
 	)
 	viper.AddConfigPath(".")
 	if configFilenamePtr == nil {
