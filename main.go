@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -167,7 +169,15 @@ func getAllWatchedFolders() []string {
 		if err != nil {
 			log.Fatal(err)
 		}
-		paths = append(paths, matches...)
+		for _, match := range matches {
+			if !path.IsAbs(match) {
+				match, err = filepath.Abs(match)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			paths = append(paths, match)
+		}
 	}
 	return paths
 }
