@@ -18,6 +18,8 @@ import (
 	"github.com/muesli/cancelreader"
 	"golang.org/x/term"
 
+	"github.com/gohugoio/hugo/watcher/filenotify"
+
 	"github.com/jhowrez/tui-hotreload/pkg/options"
 )
 
@@ -70,8 +72,8 @@ func RunCommand() *exec.Cmd {
 	signal.Notify(ch, syscall.SIGWINCH)
 	go func() {
 		for range ch {
-			if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
-				log.Printf("error resizing pty: %s", err)
+			if ptyErr := pty.InheritSize(os.Stdin, ptmx); ptyErr != nil {
+				log.Printf("error resizing pty: %s", ptyErr)
 				return
 			}
 		}
@@ -113,10 +115,7 @@ func main() {
 	}
 
 	// Create new watcher.
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
+	watcher := filenotify.NewPollingWatcher(time.Millisecond * 500)
 	defer watcher.Close()
 
 	cmd = RunCommand()
@@ -125,9 +124,11 @@ func main() {
 	go func() {
 		for {
 			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
+			case event := <-watcher.Events():
+				if event.Op&fsnotify.Create != fsnotify.Create &&
+					event.Op&fsnotify.Write != fsnotify.Write &&
+					event.Op&fsnotify.Remove != fsnotify.Remove {
+					continue
 				}
 
 				if event.Has(fsnotify.Write) {
@@ -140,15 +141,16 @@ func main() {
 					cmd = RunCommand()
 					// isReloadingCommand = false
 				}
-			case err, ok := <-watcher.Errors:
+			case watchErr, ok := <-watcher.Errors():
 				if !ok {
 					return
 				}
-				log.Println("error:", err)
+				log.Println("error:", watchErr)
 			}
 		}
 	}()
 
+	var err error
 	paths := getAllWatchedFolders()
 	for _, path := range paths {
 		err = watcher.Add(path)
