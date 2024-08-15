@@ -5,6 +5,10 @@ package options
 import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+
+	"github.com/jhowrez/go-options-generator/pkg/wrappers"
+
+	"time"
 )
 
 var (
@@ -21,6 +25,8 @@ type ApplicationOptions struct {
 	Watch struct {
 		//
 		Folders []string `yaml:"watch.folders"`
+		// duration for fsnotify poll interval
+		Interval time.Duration `yaml:"watch.interval"`
 		// if empty, will default to execution path
 		Root string `yaml:"watch.root"`
 	}
@@ -50,6 +56,12 @@ func OptionsInit(configFilenamePtr *string) {
 	applicationOptions.Watch.Root = ""
 	viper.SetDefault("watch.root",
 		applicationOptions.Watch.Root,
+	)
+
+	// watch.interval
+	applicationOptions.Watch.Interval = wrappers.MustParseDuration("100ms")
+	viper.SetDefault("watch.interval",
+		applicationOptions.Watch.Interval,
 	)
 	viper.AddConfigPath(".")
 	if configFilenamePtr == nil {

@@ -10,6 +10,7 @@ require (
 	github.com/creack/pty v1.1.21
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gohugoio/hugo v0.132.2
+	github.com/jhowrez/go-options-generator v1.0.6
 	github.com/muesli/cancelreader v0.2.2
 	github.com/spf13/viper v1.16.0
 	golang.org/x/term v0.23.0

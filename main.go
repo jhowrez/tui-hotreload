@@ -115,7 +115,7 @@ func main() {
 	}
 
 	// Create new watcher.
-	watcher := filenotify.NewPollingWatcher(time.Millisecond * 500)
+	watcher := filenotify.NewPollingWatcher(options.GetOptions().Watch.Interval)
 	defer watcher.Close()
 
 	cmd = RunCommand()
@@ -136,7 +136,7 @@ func main() {
 					if cmd != nil {
 						syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 						cmd.Process.Wait()
-						time.Sleep(time.Millisecond * 250)
+						time.Sleep(time.Millisecond * 100)
 					}
 					cmd = RunCommand()
 					// isReloadingCommand = false

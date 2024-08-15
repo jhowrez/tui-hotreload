@@ -14,3 +14,8 @@ options:
     yaml: watch.root
     description: if empty, will default to execution path
     default: ""
+  - name: Poll interval
+    yaml: watch.interval
+    description: duration for fsnotify poll interval
+    default: 100ms
+    format: duration
