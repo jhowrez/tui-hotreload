@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -19,13 +20,21 @@ import (
 )
 
 var (
-	initialTermState *term.State
-	cmd              *exec.Cmd
+	initialTermState  *term.State
+	cmd               *exec.Cmd
+	printDebugAndExit bool
 )
 
 func init() {
 	var appCfgPath string
 	flag.StringVar(&appCfgPath, "c", "./app.yaml", "app options config path. Default ./app.yaml")
+	flag.BoolFunc("d", "print debug information and exit", func(flagValue string) error {
+		if flagValue == "false" {
+			return nil
+		}
+		printDebugAndExit = true
+		return nil
+	})
 	flag.Parse()
 	options.OptionsInit(&appCfgPath)
 }
@@ -91,6 +100,16 @@ func main() {
 		os.Chdir(options.GetOptions().Watch.Root)
 	}
 
+	if printDebugAndExit {
+		paths := getAllWatchedFolders()
+		fmt.Printf("The following %d paths will be watched:\n", len(paths))
+		for _, path := range paths {
+			fmt.Printf("- %s\n", path)
+		}
+
+		os.Exit(0)
+	}
+
 	// Create new watcher.
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -128,22 +147,27 @@ func main() {
 		}
 	}()
 
-	for _, pathPattern := range options.GetOptions().Watch.Folders {
-		// Add path.
-		paths, err := BetterGlob(pathPattern)
+	paths := getAllWatchedFolders()
+	for _, path := range paths {
+		err = watcher.Add(path)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		for _, path := range paths {
-			err = watcher.Add(path)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
 	}
 
 	// Block main goroutine forever.
 	<-make(chan struct{})
+}
+
+func getAllWatchedFolders() []string {
+	paths := []string{}
+	for _, pathPattern := range options.GetOptions().Watch.Folders {
+		// Add path.
+		matches, err := BetterGlob(pathPattern)
+		if err != nil {
+			log.Fatal(err)
+		}
+		paths = append(paths, matches...)
+	}
+	return paths
 }
