@@ -1,4 +1,7 @@
 
+upgrade-deps:
+	go get -u
+	go mod tidy
 
 generate-options:
 	go run github.com/jhowrez/go-options-generator@latest \
